@@ -1,6 +1,6 @@
 Shows all opened windows in notication area.
 
-Add UnityAppTray to systray-whitelist:
+= Add UnityAppTray to systray-whitelist: =
 
 $ gsettings get com.canonical.Unity.Panel  systray-whitelist
 ['JavaEmbeddedFrame', 'Mumble', 'Wine', 'Skype', 'hp-systray', 'scp-dbus-service']
@@ -10,3 +10,10 @@ $ gsettings set com.canonical.Unity.Panel systray-whitelist \
 
 or
 $ gsettings set com.canonical.Unity.Panel systray-whitelist  "['all']"
+
+
+= How to compile =
+
+$ sudo apt-get install libgee-dev valac libgtk2.0-dev libwnck-dev
+$ ./m.sh
+
