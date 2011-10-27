@@ -5,6 +5,7 @@ public class Main {
   class UnityAppTray {
 
     private HashMap<ulong, StatusIcon> theMap = new HashMap<ulong, StatusIcon>();
+    private StatusIcon theShowDesktopIcon;
 
     public UnityAppTray() {
     }
@@ -31,7 +32,11 @@ public class Main {
          }
         });
 
+        addShowDesktopIcon();
+            
         Timeout.add (1000, () => {
+
+            
             // SHOW ALL WINDOWS ON TRAY
             weak GLib.List<Wnck.Window> list = screen.get_windows();
             foreach(Wnck.Window win in list) {
@@ -44,15 +49,51 @@ public class Main {
 
     }
 
+    private void addShowDesktopIcon() {
+        theShowDesktopIcon = new StatusIcon.from_stock(Stock.STRIKETHROUGH) ;
+        theShowDesktopIcon.set_tooltip_text ("Show Desktop");
+        theShowDesktopIcon.set_visible(true);
+        theShowDesktopIcon.activate.connect( () => {
+            Wnck.Screen screen = Wnck.Screen.get_default();
+            screen.force_update();
+            weak GLib.List<Wnck.Window> list = screen.get_windows();
+            foreach(Wnck.Window win in list) {
+                if(isAllowed(win)) {
+                    win.minimize();
+                }
+            }
+        });  
+        
+    }
+    
+    private bool isAllowed(Wnck.Window aWindow) {
+        // FILTER
+        if(aWindow.get_name() == "compiz") return false;
+        if(aWindow.get_name() == "Desktop") return  false;
+        if(aWindow.get_name() == "x-nautilus-desktop") return  false;
+        if(aWindow.get_name() == "<unknown>") return  false;
+        if(aWindow.get_name() == "") return  false;
+        if(aWindow.get_name() == "Untitled window") return  false;
+
+        try {
+            if(new GLib.Regex(".* - Skype™ \\(Beta\\).*").match(aWindow.get_name())) return false;        
+        } catch (GLib.RegexError e) {
+            return true;
+        }    
+
+        if(aWindow.get_class_group().get_name() == "Gnome-panel") return false;
+        
+        return true;
+    }
+    
     // on open window
     public void window_opened(Wnck.Window aWindow) {
         stdout.printf("opened [window='%s', xid=%x, group='%s']\n", aWindow.get_name(), (uint)aWindow.get_xid(), aWindow.get_class_group().get_name());
 
         // FILTER
-        if(aWindow.get_name() == "<unknown>") return ;
-        if(aWindow.get_class_group().get_name() == "Gnome-panel") return;
-        if(aWindow.get_name() == "Untitled window") return ;
-        if(new GLib.Regex(".* - Skype™ \\(Beta\\)").match(aWindow.get_name())) return;
+        if(! isAllowed(aWindow)) {
+            return ;
+        }
 
         // CREATE ICON ON TRAY 
         StatusIcon trayicon = new StatusIcon.from_pixbuf(aWindow.get_icon()) ; //new StatusIcon();
