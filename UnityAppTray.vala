@@ -132,6 +132,9 @@ public class Main {
             // (item.user_data as Wnck.Window).unmake_above();
         });  
 
+        // on right click, hide icon
+        trayicon.popup_menu.connect( () => { trayicon.set_visible(false); } );
+        
         // ON TITLE CHANGED
         aWindow.name_changed.connect( () => { trayicon.set_tooltip_text ( aWindow.get_name()); } );
         aWindow.icon_changed.connect( () => { trayicon.set_from_pixbuf  ( aWindow.get_icon()); } );
