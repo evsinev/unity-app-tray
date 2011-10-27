@@ -31,13 +31,16 @@ public class Main {
          }
         });
 
-        // SHOW ALL WINDOWS ON TRAY
-        weak GLib.List<Wnck.Window> list = screen.get_windows();
-        foreach(Wnck.Window win in list) {
-            if(win.get_class_group().get_name()!="" && win.get_name()!="x-nautilus-desktop") {
-                window_opened(win);
+        Timeout.add (1000, () => {
+            // SHOW ALL WINDOWS ON TRAY
+            weak GLib.List<Wnck.Window> list = screen.get_windows();
+            foreach(Wnck.Window win in list) {
+                if(win.get_class_group().get_name()!="" && win.get_name()!="x-nautilus-desktop") {
+                    window_opened(win);
+                }
             }
-        }
+            return false;
+        });
 
     }
 
@@ -47,7 +50,9 @@ public class Main {
 
         // FILTER
         if(aWindow.get_name() == "<unknown>") return ;
-        if(aWindow.get_name() == "e.sinev - Skype™ (Beta)") return;
+        if(aWindow.get_class_group().get_name() == "Gnome-panel") return;
+        if(aWindow.get_name() == "Untitled window") return ;
+        if(new GLib.Regex(".* - Skype™ \\(Beta\\)").match(aWindow.get_name())) return;
 
         // CREATE ICON ON TRAY 
         StatusIcon trayicon = new StatusIcon.from_pixbuf(aWindow.get_icon()) ; //new StatusIcon();
