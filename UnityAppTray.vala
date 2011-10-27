@@ -105,6 +105,10 @@ public class Main {
         return true;
     }
     
+    private void nextImage(StatusIcon aTrayIcon) {
+         aTrayIcon.set_from_pixbuf(aTrayIcon.get_pixbuf().rotate_simple(Gdk.PixbufRotation.CLOCKWISE));
+    }
+    
     // on open window
     public void window_opened(Wnck.Window aWindow) {
         stdout.printf("opened [window='%s', xid=%x, group='%s']\n", aWindow.get_name(), (uint)aWindow.get_xid(), aWindow.get_class_group().get_name());
@@ -118,6 +122,12 @@ public class Main {
         StatusIcon trayicon = new StatusIcon.from_pixbuf(aWindow.get_icon()) ; //new StatusIcon();
         trayicon.set_tooltip_text (aWindow.get_name());
         trayicon.set_visible(true);
+        
+        trayicon.scroll_event.connect( () => { 
+            nextImage(trayicon);
+            return true;
+        } );
+        
         theMap.set(aWindow.get_xid(), trayicon);
 
         // ON ICON CLICKED
