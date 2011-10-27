@@ -49,17 +49,34 @@ public class Main {
 
     }
 
+    private bool areNotAllWindowsMinimized() {
+        Wnck.Screen screen = Wnck.Screen.get_default();
+        screen.force_update();
+        weak GLib.List<Wnck.Window> list = screen.get_windows();
+        foreach(Wnck.Window win in list) {
+            if(isAllowed(win) && !win.is_minimized()) {
+                stdout.printf(@"    window '%s' is not minimized\n", win.get_name());
+                return true;
+            }
+        }
+        return false;
+    }
+    
     private void addShowDesktopIcon() {
         theShowDesktopIcon = new StatusIcon.from_stock(Stock.STRIKETHROUGH) ;
         theShowDesktopIcon.set_tooltip_text ("Show Desktop");
         theShowDesktopIcon.set_visible(true);
+
+        
         theShowDesktopIcon.activate.connect( () => {
-            Wnck.Screen screen = Wnck.Screen.get_default();
-            screen.force_update();
-            weak GLib.List<Wnck.Window> list = screen.get_windows();
-            foreach(Wnck.Window win in list) {
-                if(isAllowed(win)) {
-                    win.minimize();
+            if(areNotAllWindowsMinimized()) {
+                Wnck.Screen screen = Wnck.Screen.get_default();
+                screen.force_update();
+                weak GLib.List<Wnck.Window> list = screen.get_windows();
+                foreach(Wnck.Window win in list) {
+                    if(isAllowed(win) && !win.is_minimized()) {
+                        win.minimize();
+                    }
                 }
             }
         });  
@@ -68,6 +85,8 @@ public class Main {
     
     private bool isAllowed(Wnck.Window aWindow) {
         // FILTER
+        if(aWindow.get_name() == "panel") return false;
+        if(aWindow.get_name() == "launcher") return false;
         if(aWindow.get_name() == "compiz") return false;
         if(aWindow.get_name() == "Desktop") return  false;
         if(aWindow.get_name() == "x-nautilus-desktop") return  false;
