@@ -88,7 +88,7 @@ public class Main {
     }
     
     private void addShowDesktopIcon() {
-        theShowDesktopIcon = new StatusIcon.from_stock(Stock.STRIKETHROUGH) ;
+        theShowDesktopIcon = new StatusIcon.from_stock("gtk-strikethrough") ; // Stock.STRIKETHROUGH) ; for ubuntu 10.10
         theShowDesktopIcon.set_tooltip_text ("Show Desktop");
         theShowDesktopIcon.set_visible(true);
 
