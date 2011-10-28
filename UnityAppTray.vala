@@ -1,6 +1,6 @@
 using Gtk, Gee;
 
-public class Main {
+//public class Main {
 
   class UnityAppTray {
 
@@ -58,20 +58,19 @@ public class Main {
         });
 
         addShowDesktopIcon();
-            
-        Timeout.add (1000, () => {
 
-            
-            // SHOW ALL WINDOWS ON TRAY
-            weak GLib.List<Wnck.Window> list = screen.get_windows();
-            foreach(Wnck.Window win in list) {
-                if(win.get_class_group().get_name()!="" && win.get_name()!="x-nautilus-desktop") {
+        
+        // SHOW ALL WINDOWS ON TRAY
+        weak GLib.List<Wnck.Window> list = screen.get_windows();
+        foreach(Wnck.Window win in list) {
+            if(win.get_class_group().get_name()!="" && win.get_name()!="x-nautilus-desktop") {
+                Gdk.threads_enter();
                     window_opened(win);
-                }
+                    Thread.usleep (1000000);
+                Gdk.threads_leave();
             }
-            return false;
-        });
-
+        }
+            
     }
 
     private bool areNotAllWindowsMinimized() {
@@ -176,22 +175,43 @@ public class Main {
         // ON TITLE CHANGED
         aWindow.name_changed.connect( () => { trayicon.set_tooltip_text ( aWindow.get_name()); } );
         aWindow.icon_changed.connect( () => { trayicon.set_from_pixbuf  ( aWindow.get_icon()); } );
-        aWindow.actions_changed.connect ( (changed_mask, new_state) => {
-            //string s = aWindow.get_state().to_string();
-            stdout.printf("window changed %d\n", new_state);
-            
-        });
 
     }
   }
 
   public static int main (string[] args) {
+    Gdk.threads_init();
     Gtk.init(ref args);
-
+    
     var app = new UnityAppTray();
     app.init();
 
+//   Gtk.Window window = new Gtk.Window();
+//   window.resize(10, 10);
+//   window.title = "UnitAppTray-init";
+//   window.show();
+//
+//   Wnck.Screen screen = Wnck.Screen.get_default();
+//   screen.window_closed.connect( (aWindow) => { 
+//       if(aWindow.get_name() == "UnitAppTray-init") {
+//         Gdk.threads_enter();
+//    app.init(); 
+//        Gdk.threads_leave();
+//       }
+//   });
+//    
+//   Timeout.add (100, () => {
+//        Gdk.threads_enter();
+//        window.hide();
+//        Gdk.threads_leave();
+//        return false;
+//   });
+    
+    Gdk.threads_enter();
     Gtk.main();
+    Gdk.threads_leave();
+
+
     return 0;
   }
-}
+//}
