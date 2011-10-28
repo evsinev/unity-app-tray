@@ -10,11 +10,36 @@ public class Main {
     public UnityAppTray() {
     }
 
+
+    private void setOrigIcon(Wnck.Window aWindow) {
+        StatusIcon icon = theMap.get(aWindow.get_xid());
+        if(icon!=null) {
+            icon.set_from_pixbuf(aWindow.get_icon());
+        }
+    }    
+
+    private void setSaturatedIcon(Wnck.Window aWindow) {
+        StatusIcon icon = theMap.get(aWindow.get_xid());
+        if(icon!=null) {
+                var pixbuf2 = icon.get_pixbuf().copy();
+                icon.get_pixbuf().saturate_and_pixelate(pixbuf2, 0.0f, true);
+                icon.set_from_pixbuf(pixbuf2);
+        }
+    }    
+    
     public void init() {
 
         Wnck.Screen screen = Wnck.Screen.get_default();
         screen.force_update();
 
+        screen.active_window_changed.connect( (aPreviousWindow) => {
+            
+            Wnck.Window activeWindow = screen.get_active_window();
+            if(activeWindow!=null)    setOrigIcon(activeWindow);
+            if(aPreviousWindow!=null) setSaturatedIcon(aPreviousWindow);
+            
+        });
+        
         // ON OPEN
         screen.window_opened.connect( window_opened );
 
@@ -106,7 +131,9 @@ public class Main {
     }
     
     private void nextImage(StatusIcon aTrayIcon) {
-         aTrayIcon.set_from_pixbuf(aTrayIcon.get_pixbuf().rotate_simple(Gdk.PixbufRotation.CLOCKWISE));
+         aTrayIcon.set_from_pixbuf(
+            aTrayIcon.get_pixbuf().rotate_simple(Gdk.PixbufRotation.CLOCKWISE)
+         );
     }
     
     // on open window
@@ -129,7 +156,8 @@ public class Main {
         } );
         
         theMap.set(aWindow.get_xid(), trayicon);
-
+        setSaturatedIcon(aWindow);
+        
         // ON ICON CLICKED
         trayicon.activate.connect( () => {
 
@@ -148,6 +176,11 @@ public class Main {
         // ON TITLE CHANGED
         aWindow.name_changed.connect( () => { trayicon.set_tooltip_text ( aWindow.get_name()); } );
         aWindow.icon_changed.connect( () => { trayicon.set_from_pixbuf  ( aWindow.get_icon()); } );
+        aWindow.actions_changed.connect ( (changed_mask, new_state) => {
+            //string s = aWindow.get_state().to_string();
+            stdout.printf("window changed %d\n", new_state);
+            
+        });
 
     }
   }
