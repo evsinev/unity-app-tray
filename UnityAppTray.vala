@@ -66,7 +66,7 @@ using Gtk, Gee;
             if(win.get_class_group().get_name()!="" && win.get_name()!="x-nautilus-desktop") {
                 Gdk.threads_enter();
                     window_opened(win);
-                    Thread.usleep (1000000);
+                    //Thread.usleep (1000000);
                 Gdk.threads_leave();
             }
         }
